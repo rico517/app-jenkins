@@ -6,8 +6,12 @@ pipeline {
 		disableConcurrentBuilds()
 	}
 
+    tools{
+        nodejs 'node'
+    }
+
 	environment {
-		NODE_OPTIONS = '--max_old_space_size=4096'
+		SCANNER_HOME = tool 'SonarScanner'
 	}
 
 	stages {

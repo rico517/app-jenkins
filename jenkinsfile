@@ -1,0 +1,78 @@
+pipeline {
+	agent any
+
+	options {
+		timestamps()
+		disableConcurrentBuilds()
+	}
+
+	environment {
+		NODE_OPTIONS = '--max_old_space_size=4096'
+	}
+
+	stages {
+		stage('Checkout') {
+			steps {
+				checkout scm
+			}
+		}
+
+		stage('Install') {
+			steps {
+				sh 'npm install'
+			}
+		}
+
+		stage('Build') {
+			steps {
+				sh 'npm run build -- --configuration production'
+			}
+		}
+
+		stage('Test') {
+			steps {
+				sh 'npm run test -- --watch=false --code-coverage --browsers=ChromeHeadless'
+			}
+			post {
+				always {
+					junit allowEmptyResults: true, testResults: 'reports/**/*.xml'
+				}
+			}
+		}
+
+		stage('SonarQube') {
+			steps {
+				withSonarQubeEnv('SonarQube') {
+					sh '''
+                        ${SCANNER_HOME}/bin/sonar-scanner
+					'''
+				}
+			}
+		}
+
+		stage('Quality Gate') {
+			steps {
+				timeout(time: 10, unit: 'MINUTES') {
+					waitForQualityGate abortPipeline: true
+				}
+			}
+		}
+
+		stage('Package') {
+			steps {
+				sh 'tar -czfv app-jenkins.tgz dist'
+			}
+			post {
+				success {
+					archiveArtifacts artifacts: '*.tgz', fingerprint: true, allowEmptyArchive: true
+				}
+			}
+		}
+	}
+
+	post {
+		always {
+			cleanWs()
+		}
+	}
+}

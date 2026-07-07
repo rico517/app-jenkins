@@ -10,7 +10,7 @@ pipeline {
 	}
 
 	stages {
-		stage(){
+		stage('install chrome'){
 			steps{
 				sh '''
 				apt-get update

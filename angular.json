@@ -90,6 +90,11 @@
               "src/styles.css"
             ],
             "scripts": []
+          },
+          "configurations": {
+            "ci":{
+              "watch": false
+            }
           }
         }
       }

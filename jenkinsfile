@@ -6,11 +6,6 @@ pipeline {
         }
     }
 
-	options {
-		timestamps()
-		disableConcurrentBuilds()
-	}
-
     tools{
         nodejs 'node'
     }
